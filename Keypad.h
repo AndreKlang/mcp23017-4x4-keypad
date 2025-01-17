@@ -43,7 +43,6 @@ namespace klang {
       std::function<void(Key)> onPressCallback = nullptr;
       std::function<void(Key)> onReleaseCallback = nullptr;
 
-      static uint16_t mapKey(int col, int row);
       void updateKeys(uint16_t keys);
       void reset();
     public:

@@ -24,22 +24,16 @@ namespace klang {
 
     for (int col = 0; col < 4; col++) {
       io->write8(port, 0xFF & ~(1 << col)); // all HIGH except col
-      auto active = io->read8(port);
+      uint8_t active = io->read8(port) >> 4;
       for (int row = 0; row < 4; row++) {
-        if ((active >> 4 & 1 << row) == 1 << row) {
-          keys |= Keypad::mapKey(col, row);
+        if (active & 1 << row) {
+          keys |= 1 << ((row * 4) + col);
         }
       }
     }
 
     reset();
     updateKeys(keys);
-  }
-
-  uint16_t Keypad::mapKey(int col, int row) {
-    uint8_t key = (row * 4) + col;
-
-    return 1 << key;
   }
 
   void Keypad::updateKeys(uint16_t keys) {
@@ -52,16 +46,12 @@ namespace klang {
       bool before = (currentKeys & key) == key;
       bool after = (keys & key) == key;
 
-      if (before && !after) {
-        if (onReleaseCallback != nullptr) {
-          onReleaseCallback(Key(i));
-        }
+      if (before && !after && onReleaseCallback != nullptr) {
+        onReleaseCallback(Key(i));
       }
 
-      if (!before && after) {
-        if (onPressCallback != nullptr) {
-          onPressCallback(Key(i));
-        }
+      if (!before && after && onPressCallback != nullptr) {
+        onPressCallback(Key(i));
       }
     }
 
